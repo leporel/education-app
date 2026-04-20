@@ -1,3 +1,6 @@
 prompts_logs/
 domains/*
 !domains/_example-japanese/
+.app/education-app.exe
+.app/education-app
+.app/server/embedded-dist.ts

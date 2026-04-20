@@ -1,0 +1,86 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - platform: linux-x64
+            target: bun-linux-x64
+            ext: ""
+          - platform: linux-arm64
+            target: bun-linux-arm64
+            ext: ""
+          - platform: darwin-x64
+            target: bun-darwin-x64
+            ext: ""
+          - platform: darwin-arm64
+            target: bun-darwin-arm64
+            ext: ""
+          - platform: win-x64
+            target: bun-windows-x64
+            ext: .exe
+          - platform: win-arm64
+            target: bun-windows-arm64
+            ext: .exe
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get latest tag
+        id: tag
+        run: echo "version=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies & build client
+        working-directory: .app
+        run: |
+          bun install
+          bun run build
+          bun scripts/embed-dist.ts  # Встраиваем статику в TS
+
+      - name: Compile server for ${{ matrix.platform }}
+        working-directory: .app
+        run: bun build --compile --target ${{ matrix.target }} server/index.ts --outfile education-app
+
+      - name: Prepare release directory
+        run: |
+          mkdir -p release/education
+          cp .app/education-app${{ matrix.ext }} release/education/
+          cp CLAUDE.md release/education/
+          cp README.md release/education/
+          cp -r .templates release/education/
+          cp -r domains release/education/
+          mkdir -p release/education/.state
+          cp .state/README.md release/education/.state/
+
+      - name: Create release archive
+        working-directory: release
+        run: |
+          zip -r "education-${{ matrix.platform }}-${{ steps.tag.outputs.version }}.zip" education/
+
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.version }}
+          name: Release ${{ steps.tag.outputs.version }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: release/education-${{ matrix.platform }}-${{ steps.tag.outputs.version }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
