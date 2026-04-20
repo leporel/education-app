@@ -1,0 +1,3 @@
+prompts_logs/
+domains/*
+!domains/_example-japanese/

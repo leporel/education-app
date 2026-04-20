@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 140" width="300" height="140">
+  <rect width="300" height="140" fill="#fafafa"/>
+  <text x="150" y="20" font-family="sans-serif" font-size="14" text-anchor="middle" fill="#333">Hiragana — ряды а / к</text>
+  <g font-family="serif" font-size="22" text-anchor="middle" fill="#222">
+    <text x="40" y="60">あ</text><text x="80" y="60">い</text><text x="120" y="60">う</text><text x="160" y="60">え</text><text x="200" y="60">お</text>
+    <text x="40" y="100">か</text><text x="80" y="100">き</text><text x="120" y="100">く</text><text x="160" y="100">け</text><text x="200" y="100">こ</text>
+  </g>
+  <g font-family="sans-serif" font-size="10" text-anchor="middle" fill="#888">
+    <text x="40" y="75">a</text><text x="80" y="75">i</text><text x="120" y="75">u</text><text x="160" y="75">e</text><text x="200" y="75">o</text>
+    <text x="40" y="115">ka</text><text x="80" y="115">ki</text><text x="120" y="115">ku</text><text x="160" y="115">ke</text><text x="200" y="115">ko</text>
+  </g>
+</svg>
