@@ -1,10 +1,21 @@
 import { Database } from 'bun:sqlite'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { mkdirSync } from 'node:fs'
+import { EMBEDDED_FILE_COUNT } from './embedded-dist'
 
-// SRS using SM-2. State lives in ../../.state/progress.sqlite
+// SRS using SM-2. State lives in <workspace>/.state/progress.sqlite.
+// In dev, workspace == ../.. from this file. In a compiled binary, import.meta.dir
+// points inside the virtual bundle, so fall back to the exe's sibling directory.
+// EDU_STATE_DIR overrides both.
 
-const STATE_DIR = join(import.meta.dir, '..', '..', '.state')
+function resolveStateDir(): string {
+  const override = process.env.EDU_STATE_DIR
+  if (override && override.length > 0) return override
+  if (EMBEDDED_FILE_COUNT > 0) return join(dirname(process.execPath), '.state')
+  return join(import.meta.dir, '..', '..', '.state')
+}
+
+const STATE_DIR = resolveStateDir()
 mkdirSync(STATE_DIR, { recursive: true })
 const DB_PATH = join(STATE_DIR, 'progress.sqlite')
 
