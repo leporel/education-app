@@ -1,192 +1,298 @@
 <script setup lang="ts">
-import {
-  NConfigProvider,
-  NLayout,
-  NLayoutHeader,
-  NLayoutSider,
-  NMenu,
-  NIcon,
-  NButton,
-  NMessageProvider,
-  NDialogProvider,
-} from 'naive-ui'
-import { RouterView, useRouter } from 'vue-router'
-import { computed, h, onMounted, ref, watch } from 'vue'
-import { Home, BookOpen, Brain, Sun, Moon, StickyNote } from 'lucide-vue-next'
-import { useRoute } from 'vue-router'
-import { type DomainTree } from '@/api'
-import { useProgress } from '@/stores/progress'
-import { useTheme } from '@/stores/theme'
-import { useContent } from '@/stores/content'
-import { useUi } from '@/stores/ui'
-import SearchBar from '@/components/SearchBar.vue'
-import NotesSidebar from '@/components/NotesSidebar.vue'
+import { NConfigProvider, NMessageProvider, NDialogProvider } from "naive-ui";
+import { RouterView, useRoute } from "vue-router";
+import { onMounted, watch } from "vue";
+import { useRecent } from "@/composables/useRecent";
+import { useProgress } from "@/stores/progress";
+import { useTheme } from "@/stores/theme";
+import { useContent } from "@/stores/content";
+import { useUi } from "@/stores/ui";
+import { useSrs } from "@/stores/srs";
+import TopNav from "@/components/layout/TopNav.vue";
+import LeftSidebar from "@/components/layout/LeftSidebar.vue";
+import FileTreePanel from "@/components/tree/FileTreePanel.vue";
+import NotesSidebar from "@/components/NotesSidebar.vue";
 
-const router = useRouter()
-const route = useRoute()
-const progress = useProgress()
-const theme = useTheme()
-const content = useContent()
-const ui = useUi()
-const tree = ref<DomainTree[]>([])
-
-const currentDomain = computed(() => (route.params.domain as string | undefined) ?? '')
+const route = useRoute();
+const progress = useProgress();
+const theme = useTheme();
+const content = useContent();
+const ui = useUi();
+const srs = useSrs();
+const recent = useRecent();
 
 watch(
-  () => route.query.note,
-  (v) => {
-    const id = Array.isArray(v) ? v[0] : v
-    if (id) ui.openNote(String(id))
-  },
-  { immediate: true },
-)
+    () => route.params.docId,
+    (id) => {
+        if (id) recent.push(decodeURIComponent(id as string));
+    },
+);
+
+watch(
+    () => route.query.note,
+    (v) => {
+        const id = Array.isArray(v) ? v[0] : v;
+        if (id) ui.openNote(String(id));
+    },
+    { immediate: true },
+);
 
 onMounted(async () => {
-  await content.load()
-  tree.value = content.tree
-  await progress.load()
-})
-
-const menuOptions = computed(() => {
-  const base = [
-    {
-      label: 'Главная',
-      key: 'home',
-      icon: () => h(NIcon, null, () => h(Home, { size: 16 })),
-    },
-    {
-      label: 'SRS на сегодня',
-      key: 'srs',
-      icon: () => h(NIcon, null, () => h(Brain, { size: 16 })),
-    },
-  ]
-  const mapDomain = (d: DomainTree, suffix = '') => ({
-    label: `${d.slug}${suffix}`,
-    key: `domain:${d.slug}`,
-    icon: () => h(NIcon, null, () => h(BookOpen, { size: 16 })),
-    children: d.modules.map((m) => ({
-      label: m.slug,
-      key: `module:${d.slug}/${m.slug}`,
-    })),
-  })
-  const domains = tree.value.filter((d) => !d.hidden).map((d) => mapDomain(d))
-  const examples = tree.value.filter((d) => d.hidden).map((d) => mapDomain(d, ' (пример)'))
-  return [...base, { type: 'divider', key: 'd1' }, ...domains, ...examples]
-})
-
-function onMenu(key: string) {
-  if (key === 'home') router.push('/')
-  else if (key === 'srs') router.push('/srs')
-  else if (key.startsWith('domain:')) router.push(`/d/${key.slice('domain:'.length)}`)
-  else if (key.startsWith('module:')) {
-    const [domain, module] = key.slice('module:'.length).split('/')
-    router.push(`/d/${domain}/m/${module}`)
-  }
-}
+    await content.load();
+    await progress.load();
+    await srs.refresh();
+});
 </script>
 
 <template>
-  <NConfigProvider :theme="theme.naive" :theme-overrides="theme.overrides">
-    <NMessageProvider>
-      <NDialogProvider>
-        <NLayout has-sider style="height: 100vh" :class="`theme-${theme.mode}`">
-          <NLayoutSider bordered :width="260" content-style="padding: 12px">
-            <h3 style="margin: 0 0 12px 0; font-size: 14px; opacity: 0.7">Education</h3>
-            <NMenu
-              :options="(menuOptions as any)"
-              :on-update:value="onMenu"
-              :indent="14"
-              :collapsed-width="0"
-            />
-          </NLayoutSider>
-          <NLayout>
-            <NLayoutHeader
-              bordered
-              class="header"
-              :class="{ 'notes-pinned': ui.notesPinned && ui.notesOpen && currentDomain }"
-            >
-              <div class="path">{{ $route.fullPath }}</div>
-              <SearchBar />
-              <NButton
-                v-if="currentDomain"
-                size="small"
-                quaternary
-                circle
-                :title="ui.notesOpen ? 'Скрыть заметки' : 'Показать заметки'"
-                @click="ui.toggleNotes"
-              >
-                <template #icon>
-                  <NIcon><StickyNote :size="16" /></NIcon>
-                </template>
-              </NButton>
-              <NButton
-                size="small"
-                quaternary
-                circle
-                :title="theme.mode === 'dark' ? 'Светлая тема' : 'Тёмная тема'"
-                @click="theme.toggle"
-              >
-                <template #icon>
-                  <NIcon>
-                    <Sun v-if="theme.mode === 'dark'" :size="16" />
-                    <Moon v-else :size="16" />
-                  </NIcon>
-                </template>
-              </NButton>
-            </NLayoutHeader>
-            <main
-              class="content"
-              :class="{ 'notes-pinned': ui.notesPinned && ui.notesOpen && currentDomain }"
-            >
-              <RouterView />
-            </main>
-          </NLayout>
-        </NLayout>
-        <NotesSidebar v-if="currentDomain" />
-      </NDialogProvider>
-    </NMessageProvider>
-  </NConfigProvider>
+    <NConfigProvider :theme="theme.naive" :theme-overrides="theme.overrides">
+        <NMessageProvider>
+            <NDialogProvider>
+                <div
+                    class="app-shell"
+                    :class="[
+                        `theme-${theme.mode}`,
+                        {
+                            'notes-col':
+                                route.params.domain &&
+                                ui.notesPinned &&
+                                ui.notesOpen,
+                            'left-collapsed': ui.leftCollapsed,
+                        },
+                    ]"
+                >
+                    <div class="top-nav">
+                        <TopNav />
+                    </div>
+                    <div class="left-sidebar main-panels">
+                        <LeftSidebar />
+                    </div>
+                    <div class="file-tree main-panels">
+                        <FileTreePanel />
+                    </div>
+                    <main class="content-area main-panels">
+                        <RouterView v-slot="{ Component, route: r }">
+                            <div
+                                v-if="r.name === 'lesson'"
+                                class="content-lesson"
+                            >
+                                <component :is="Component" />
+                            </div>
+                            <div v-else class="content-scroll">
+                                <component :is="Component" />
+                            </div>
+                        </RouterView>
+                    </main>
+                    <aside
+                        v-if="
+                            route.params.domain &&
+                            ui.notesPinned &&
+                            ui.notesOpen
+                        "
+                        class="notes-column main-panels"
+                    >
+                        <NotesSidebar :pinned="true" />
+                    </aside>
+                </div>
+                <NotesSidebar
+                    v-if="
+                        route.params.domain && !(ui.notesPinned && ui.notesOpen)
+                    "
+                    :pinned="false"
+                />
+            </NDialogProvider>
+        </NMessageProvider>
+    </NConfigProvider>
 </template>
 
 <style>
-/* global CSS vars driven by theme mode (class on NLayout root) */
-.theme-light {
-  --md-link: #2a8892;
-  --md-link-hover: #3aa0ab;
-}
+/* App-level CSS vars — must mirror src/theme/palette.ts */
 .theme-dark {
-  --md-link: #6ecbd4;
-  --md-link-hover: #87d8e0;
+    --app-bg: #1a1b24;
+    --app-sidebar: #1e1f2b;
+    --app-tree: #22232f;
+    --app-surface: #1e1f2b;
+    --app-border: #2d2e3c;
+    --app-divider: #262731;
+    --app-text: #d6d4ce;
+    --app-text-2: #c9c6bf;
+    --app-muted: #9a978f;
+    --app-text-mute2: #6b6b78;
+    --app-primary: #86a3cc;
+    --app-primary-soft: rgba(134, 163, 204, 0.18);
+    --app-success: #7fb98a;
+    --app-success-soft: rgba(127, 185, 138, 0.18);
+    --app-warning: #d8b462;
+    --app-warning-soft: rgba(216, 180, 98, 0.18);
+    --app-info: #86a3cc;
+    --app-info-soft: rgba(134, 163, 204, 0.18);
+    --app-error: #d48787;
+    --app-hover: rgba(255, 255, 255, 0.05);
+    --app-scroll-thumb: rgba(214, 212, 206, 0.22);
+    --md-link: #86a3cc;
+    --md-link-hover: #9fb8db;
+}
+.theme-light {
+    --app-bg: #f7f5f1;
+    --app-sidebar: #efece7;
+    --app-tree: #f4f2ee;
+    --app-surface: #efece7;
+    --app-border: #e6e2da;
+    --app-divider: #ece8df;
+    --app-text: #2a2a2e;
+    --app-text-2: #3d3d44;
+    --app-muted: #6b6b72;
+    --app-text-mute2: #8e8b84;
+    --app-primary: #3d6e9c;
+    --app-primary-soft: rgba(61, 110, 156, 0.14);
+    --app-success: #5a8a4d;
+    --app-success-soft: rgba(90, 138, 77, 0.14);
+    --app-warning: #b8873a;
+    --app-warning-soft: rgba(184, 135, 58, 0.14);
+    --app-info: #3d6e9c;
+    --app-info-soft: rgba(61, 110, 156, 0.14);
+    --app-error: #b85c5c;
+    --app-hover: rgba(0, 0, 0, 0.04);
+    --app-scroll-thumb: rgba(42, 42, 46, 0.22);
+    --md-link: #3d6e9c;
+    --md-link-hover: #4d80b0;
+}
+
+:root {
+    --app-bg: #1a1b24;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--app-bg);
+}
+
+/* Global thin scrollbars — track invisible at rest, thumb appears when
+   the pointer is over a scrollable area. */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+}
+*:hover {
+    scrollbar-color: var(--app-scroll-thumb) transparent;
+}
+*::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background 0.15s;
+}
+*:hover::-webkit-scrollbar-thumb {
+    background: var(--app-scroll-thumb);
+    background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+    background: var(--app-muted);
+    background-clip: padding-box;
+}
+*::-webkit-scrollbar-corner {
+    background: transparent;
 }
 </style>
 
 <style scoped>
-.header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 10px 20px;
-  font-size: 13px;
-  transition: padding-right 0.18s ease;
+.app-shell {
+    display: grid;
+    height: 100vh;
+    grid-template-rows: 48px 1fr;
+    grid-template-columns: 240px 240px 1fr;
+    overflow: hidden;
+    background: var(--app-bg);
+    color: var(--app-text);
+    transition: grid-template-columns 0.18s ease;
+    gap: 7px;
 }
-.header.notes-pinned {
-  padding-right: 440px;
+
+.app-shell.notes-col {
+    grid-template-columns: 240px 240px 1fr 420px;
 }
-.path {
-  flex: 0 0 auto;
-  opacity: 0.55;
-  min-width: 0;
-  max-width: 30vw;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+
+.app-shell.left-collapsed {
+    grid-template-columns: 56px 240px 1fr;
 }
-.content {
-  padding: 20px;
-  overflow: auto;
-  transition: padding-right 0.18s ease;
+
+.app-shell.left-collapsed.notes-col {
+    grid-template-columns: 56px 240px 1fr 420px;
 }
-.content.notes-pinned {
-  padding-right: 440px;
+
+.top-nav {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    min-height: 0;
+    overflow: hidden;
+    background: var(--app-sidebar);
+    border-bottom: 1px solid var(--app-border);
+}
+
+.main-panels {
+    border-radius: 10px;
+    border: 1px solid var(--app-border);
+    margin-bottom: 10px;
+}
+
+.left-sidebar {
+    grid-column: 1;
+    grid-row: 2;
+    min-height: 0;
+    overflow: hidden auto;
+    background: var(--app-sidebar);
+}
+
+.file-tree {
+    grid-column: 2;
+    grid-row: 2;
+    min-height: 0;
+    overflow: hidden;
+    background: var(--app-tree);
+}
+
+.content-area {
+    grid-column: 3;
+    grid-row: 2;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: var(--app-bg);
+}
+
+.content-scroll {
+    flex: 1;
+    overflow: auto;
+    padding: 24px 28px;
+    min-height: 0;
+}
+
+.content-lesson {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.notes-column {
+    grid-column: 4;
+    grid-row: 2;
+    min-height: 0;
+    overflow: hidden;
 }
 </style>

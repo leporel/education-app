@@ -72,8 +72,8 @@ function reset() {
     <div v-if="drill.hint && !revealed" class="hint">подсказка: {{ drill.hint }}</div>
 
     <NSpace style="margin-top: 10px" align="center">
-      <NButton v-if="!revealed" type="primary" size="small" @click="submit">Проверить</NButton>
-      <NButton v-else size="small" @click="reset">Ещё раз</NButton>
+      <NButton v-if="!revealed" secondary size="small" @click="submit">Проверить</NButton>
+      <NButton v-else secondary size="small" @click="reset">Ещё раз</NButton>
     </NSpace>
 
     <NAlert
@@ -92,8 +92,8 @@ function reset() {
     <NAlert v-if="revealed && drill.check === 'manual'" type="info" style="margin-top: 10px" :show-icon="false">
       Эталон: <b>{{ drill.answer }}</b>
       <NSpace style="margin-top: 8px">
-        <NButton size="tiny" type="success" @click="selfGrade(true)">Справился</NButton>
-        <NButton size="tiny" type="error" @click="selfGrade(false)">Не справился</NButton>
+        <NButton secondary size="tiny" type="success" @click="selfGrade(true)">Справился</NButton>
+        <NButton secondary size="tiny" type="error" @click="selfGrade(false)">Не справился</NButton>
       </NSpace>
     </NAlert>
   </NCard>

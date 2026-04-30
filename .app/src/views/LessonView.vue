@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
-import { NCard, NSpace, NTag, NButton, NSelect, NInput, useMessage } from 'naive-ui'
-import { Pencil, Save, X } from 'lucide-vue-next'
+import { NCard, NInput, NButton, NIcon, useMessage } from 'naive-ui'
+import { Save, X } from 'lucide-vue-next'
 import { api, type Doc } from '@/api'
-import { useProgress } from '@/stores/progress'
 import MdRender from '@/components/MdRender.vue'
+import FrontmatterBadges from '@/components/content/FrontmatterBadges.vue'
+import SummaryBox from '@/components/content/SummaryBox.vue'
+import ContentToolbar from '@/components/content/ContentToolbar.vue'
 
 const props = defineProps<{ domain: string; module: string; docId: string }>()
 
-const progress = useProgress()
 const message = useMessage()
 const doc = ref<Doc | null>(null)
 const moduleId = computed(() => `${props.domain}.${props.module}`)
@@ -17,6 +18,8 @@ const moduleId = computed(() => `${props.domain}.${props.module}`)
 const editing = ref(false)
 const draft = ref('')
 const saving = ref(false)
+
+const summary = computed(() => (doc.value?.frontmatter.summary as string | undefined) ?? '')
 
 async function load() {
   doc.value = await api.doc(decodeURIComponent(props.docId))
@@ -51,79 +54,101 @@ async function save() {
 
 onMounted(load)
 watch(() => props.docId, load)
-
-const statusOptions = [
-  { label: 'todo', value: 'todo' },
-  { label: 'learning', value: 'learning' },
-  { label: 'known', value: 'known' },
-]
-
-const currentStatus = computed({
-  get: () => (doc.value ? progress.get(doc.value.id, doc.value.frontmatter.status ?? 'todo') : 'todo'),
-  set: (v: 'todo' | 'learning' | 'known') => {
-    if (doc.value) progress.set(doc.value.id, v)
-  },
-})
 </script>
 
 <template>
-  <div v-if="doc">
-    <div style="font-size: 13px; opacity: 0.6; margin-bottom: 4px">
-      <RouterLink :to="`/d/${props.domain}`" class="link">{{ props.domain }}</RouterLink>
-      /
-      <RouterLink :to="`/d/${props.domain}/m/${props.module}`" class="link">
-        {{ props.module }}
-      </RouterLink>
+  <div v-if="doc" class="lesson-view">
+    <div class="lesson-body">
+      <div class="doc-path">
+        <RouterLink :to="`/d/${props.domain}`" class="path-link">{{ props.domain }}</RouterLink>
+        <span class="path-sep"> › </span>
+        <RouterLink :to="`/d/${props.domain}/m/${props.module}`" class="path-link">{{ props.module }}</RouterLink>
+        <span class="path-sep"> › </span>
+        <span>{{ doc.path.split('/').pop() }}</span>
+      </div>
+      <h2 class="doc-title">{{ doc.frontmatter.title }}</h2>
+
+      <FrontmatterBadges :frontmatter="doc.frontmatter" :id="doc.id" />
+      <SummaryBox :text="summary" />
+
+      <NCard v-if="!editing">
+        <MdRender :body="doc.body" :module-id="moduleId" :doc-path="doc.path" />
+      </NCard>
+
+      <NCard v-else title="Редактирование (raw MD)">
+        <div class="edit-actions">
+          <NButton size="small" type="primary" :loading="saving" @click="save">
+            <template #icon><NIcon><Save :size="14" /></NIcon></template>
+            Сохранить
+          </NButton>
+          <NButton size="small" @click="cancelEdit">
+            <template #icon><NIcon><X :size="14" /></NIcon></template>
+            Отмена
+          </NButton>
+        </div>
+        <NInput
+          v-model:value="draft"
+          type="textarea"
+          :autosize="{ minRows: 20, maxRows: 60 }"
+          placeholder="Markdown + frontmatter..."
+          style="font-family: 'JetBrains Mono', Consolas, monospace; font-size: 13px"
+        />
+      </NCard>
     </div>
-    <h2 style="margin-bottom: 6px">{{ doc.frontmatter.title }}</h2>
 
-    <NSpace align="center" style="margin-bottom: 16px">
-      <NTag size="small">{{ doc.frontmatter.type }}</NTag>
-      <NTag v-for="t in doc.frontmatter.tags" :key="t" size="small" type="info">{{ t }}</NTag>
-      <span style="opacity: 0.6; font-size: 12px">обновлено {{ doc.frontmatter.updated }}</span>
-      <NSelect
-        v-model:value="currentStatus"
-        :options="statusOptions"
-        size="small"
-        style="width: 130px; margin-left: auto"
-      />
-      <NButton v-if="!editing" size="small" @click="startEdit">
-        <template #icon><Pencil :size="14" /></template>
-        Править
-      </NButton>
-      <template v-else>
-        <NButton size="small" type="primary" :loading="saving" @click="save">
-          <template #icon><Save :size="14" /></template>
-          Сохранить
-        </NButton>
-        <NButton size="small" @click="cancelEdit">
-          <template #icon><X :size="14" /></template>
-          Отмена
-        </NButton>
-      </template>
-    </NSpace>
-
-    <NCard v-if="!editing">
-      <MdRender :body="doc.body" :module-id="moduleId" :doc-path="doc.path" />
-    </NCard>
-    <NCard v-else title="Редактирование (raw MD, включая frontmatter)">
-      <NInput
-        v-model:value="draft"
-        type="textarea"
-        :autosize="{ minRows: 20, maxRows: 60 }"
-        placeholder="Markdown + frontmatter..."
-        style="font-family: 'JetBrains Mono', Consolas, monospace; font-size: 13px"
-      />
-    </NCard>
+    <ContentToolbar
+      :doc-id="doc.id"
+      :domain="props.domain"
+      :module="props.module"
+      @edit="startEdit"
+    />
   </div>
 </template>
 
 <style scoped>
-.link {
+.lesson-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.lesson-body {
+  flex: 1;
+  overflow: auto;
+  padding: 24px 28px;
+  min-height: 0;
+}
+
+.doc-title {
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.doc-path {
+  font-size: 12px;
+  opacity: 0.5;
+  margin-bottom: 6px;
+}
+
+.path-link {
   color: inherit;
   text-decoration: none;
 }
-.link:hover {
+
+.path-link:hover {
   text-decoration: underline;
+}
+
+.path-sep {
+  opacity: 0.6;
 }
 </style>

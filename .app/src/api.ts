@@ -142,4 +142,5 @@ export const api = {
     post<{ ok: true }>('/api/status', { docId, state }),
   statuses: () => get<Record<string, 'todo' | 'learning' | 'known'>>('/api/status'),
   search: (q: string) => get<SearchHit[]>(`/api/search?q=${encodeURIComponent(q)}`),
+  openInExplorer: (path: string) => post<{ ok: true }>('/api/open', { path }),
 }

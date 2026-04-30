@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 const PIN_KEY = 'edu.ui.notesPinned'
+const LEFT_COLLAPSED_KEY = 'edu.ui.leftCollapsed'
 
 export const useUi = defineStore('ui', () => {
   const notesOpen = ref(false)
@@ -32,5 +33,30 @@ export const useUi = defineStore('ui', () => {
     }
   }
 
-  return { notesOpen, selectedNoteId, notesPinned, toggleNotes, openNote, closeNotes, togglePin }
+  const leftCollapsed = ref<boolean>(
+    typeof localStorage !== 'undefined' && localStorage.getItem(LEFT_COLLAPSED_KEY) === '1',
+  )
+  const treeCollapsed = ref(false)
+
+  function toggleLeftCollapsed() {
+    leftCollapsed.value = !leftCollapsed.value
+    try {
+      localStorage.setItem(LEFT_COLLAPSED_KEY, leftCollapsed.value ? '1' : '0')
+    } catch {
+      /* noop */
+    }
+  }
+
+  return {
+    notesOpen,
+    selectedNoteId,
+    notesPinned,
+    leftCollapsed,
+    treeCollapsed,
+    toggleNotes,
+    openNote,
+    closeNotes,
+    togglePin,
+    toggleLeftCollapsed,
+  }
 })

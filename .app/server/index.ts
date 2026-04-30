@@ -317,6 +317,28 @@ updated: ${today}
       }
     }
 
+    if (pathname === '/api/open' && req.method === 'POST') {
+      const body = (await req.json()) as { path?: string }
+      if (!body.path) return json({ error: 'path required' }, { status: 400 })
+      // Resolve and validate — only allow paths inside CONTENT_ROOT
+      const abs = join(CONTENT_ROOT, body.path)
+      if (!abs.startsWith(CONTENT_ROOT)) return json({ error: 'forbidden' }, { status: 403 })
+      try {
+        await stat(abs)
+      } catch {
+        return notFound('path')
+      }
+      const platform = process.platform
+      if (platform === 'win32') {
+        Bun.spawn({ cmd: ['explorer', abs.replaceAll('/', '\\')], stdout: 'ignore', stderr: 'ignore' })
+      } else if (platform === 'darwin') {
+        Bun.spawn({ cmd: ['open', abs], stdout: 'ignore', stderr: 'ignore' })
+      } else {
+        Bun.spawn({ cmd: ['xdg-open', abs], stdout: 'ignore', stderr: 'ignore' })
+      }
+      return json({ ok: true })
+    }
+
     // static SPA (production) — in dev, vite serves the SPA
     if (!pathname.startsWith('/api')) return serveStatic(pathname)
     return notFound()

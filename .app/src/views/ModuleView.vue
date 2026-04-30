@@ -4,7 +4,8 @@ import { RouterLink } from 'vue-router'
 import { NCard, NTabs, NTabPane, NTag, NSpace, NEmpty, NButton } from 'naive-ui'
 import { api, type DomainTree, type Doc } from '@/api'
 import MdRender from '@/components/MdRender.vue'
-import DrillRunner from '@/components/DrillRunner.vue'
+import FrontmatterBadges from '@/components/content/FrontmatterBadges.vue'
+import SummaryBox from '@/components/content/SummaryBox.vue'
 
 const props = defineProps<{ domain: string; module: string }>()
 
@@ -16,6 +17,10 @@ const drills = ref<Doc | null>(null)
 const lessons = ref<Doc[]>([])
 
 const moduleId = computed(() => `${props.domain}.${props.module}`)
+
+function docSummary(doc: Doc | null): string {
+  return (doc?.frontmatter.summary as string | undefined) ?? ''
+}
 
 async function load() {
   const all = await api.tree()
@@ -44,32 +49,34 @@ watch(() => [props.domain, props.module], load)
 
 <template>
   <div>
-    <div style="font-size: 13px; opacity: 0.6; margin-bottom: 4px">
-      <RouterLink :to="`/d/${props.domain}`" class="link">{{ props.domain }}</RouterLink>
-      / {{ props.module }}
-    </div>
-    <h2 style="margin-bottom: 14px">{{ index?.frontmatter.title ?? props.module }}</h2>
+    <h2 style="margin: 0 0 14px">{{ index?.frontmatter.title ?? props.module }}</h2>
 
     <NTabs type="line" default-value="index">
       <NTabPane name="index" tab="Обзор" v-if="index">
+        <FrontmatterBadges :frontmatter="index.frontmatter" :id="index.id" />
+        <SummaryBox :text="docSummary(index)" />
         <NCard>
           <MdRender :body="index.body" :module-id="moduleId" :doc-path="index.path" />
         </NCard>
       </NTabPane>
 
       <NTabPane name="theory" tab="Теория" v-if="theory">
+        <FrontmatterBadges :frontmatter="theory.frontmatter" :id="theory.id" />
+        <SummaryBox :text="docSummary(theory)" />
         <NCard>
           <MdRender :body="theory.body" :module-id="moduleId" :doc-path="theory.path" />
         </NCard>
       </NTabPane>
 
       <NTabPane name="cards" tab="Карточки" v-if="cards">
+        <FrontmatterBadges :frontmatter="cards.frontmatter" :id="cards.id" />
         <NCard>
           <MdRender :body="cards.body" :module-id="moduleId" :doc-path="cards.path" />
         </NCard>
       </NTabPane>
 
       <NTabPane name="drills" tab="Упражнения" v-if="drills">
+        <FrontmatterBadges :frontmatter="drills.frontmatter" :id="drills.id" />
         <NCard>
           <MdRender :body="drills.body" :module-id="moduleId" :doc-path="drills.path" />
         </NCard>

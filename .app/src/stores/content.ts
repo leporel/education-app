@@ -83,5 +83,29 @@ export const useContent = defineStore('content', () => {
     return tree.value.find((d) => d.slug === domain)?.misc ?? []
   }
 
-  return { tree, loaded, byPath, load, resolveLink, routeFor, notesFor, miscFor }
+  function domainBySlug(slug: string) {
+    return tree.value.find((d) => d.slug === slug)
+  }
+
+  function moduleBySlug(domainSlug: string, moduleSlug: string) {
+    return domainBySlug(domainSlug)?.modules.find((m) => m.slug === moduleSlug)
+  }
+
+  function siblingDocs(domainSlug: string, moduleSlug: string) {
+    return moduleBySlug(domainSlug, moduleSlug)?.docs ?? []
+  }
+
+  return {
+    tree,
+    loaded,
+    byPath,
+    load,
+    resolveLink,
+    routeFor,
+    notesFor,
+    miscFor,
+    domainBySlug,
+    moduleBySlug,
+    siblingDocs,
+  }
 })

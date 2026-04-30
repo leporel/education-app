@@ -3,6 +3,8 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 const routes: RouteRecordRaw[] = [
   { path: '/', name: 'home', component: () => import('./views/HomeView.vue') },
   { path: '/srs', name: 'srs', component: () => import('./views/SrsView.vue') },
+  { path: '/bookmarks', name: 'bookmarks', component: () => import('./views/BookmarksView.vue') },
+  { path: '/recent', name: 'recent', component: () => import('./views/RecentView.vue') },
   {
     path: '/d/:domain',
     name: 'domain',

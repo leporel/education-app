@@ -29,11 +29,11 @@ onMounted(async () => {
 type Status = 'todo' | 'learning' | 'known'
 type BucketKey = Status
 
-const COLORS: Record<BucketKey, string> = {
-  known: '#6b8e5a',
-  learning: '#c49a3a',
-  todo: '#55555f',
-}
+const COLORS = computed<Record<BucketKey, string>>(() => ({
+  known: theme.palette.success,
+  learning: theme.palette.warning,
+  todo: theme.palette.text3,
+}))
 const LABELS: Record<BucketKey, string> = {
   known: 'выучено',
   learning: 'в процессе',
@@ -87,21 +87,21 @@ const totals = computed(() => {
 
 const segments = computed(() =>
   (['known', 'learning', 'todo'] as const)
-    .map((k) => ({ key: k, label: LABELS[k], value: totals.value[k], color: COLORS[k] }))
+    .map((k) => ({ key: k, label: LABELS[k], value: totals.value[k], color: COLORS.value[k] }))
     .filter((s) => s.value > 0),
 )
 
 const chartOption = computed(() => {
-  const isDark = theme.mode === 'dark'
+  const p = theme.palette
   return {
     tooltip: {
       trigger: 'item',
-      backgroundColor: isDark ? '#2b2b33' : '#ffffff',
-      borderColor: isDark ? '#36363e' : '#e6e2da',
+      backgroundColor: p.surface,
+      borderColor: p.border,
       borderWidth: 1,
-      textStyle: { color: isDark ? '#d6d4ce' : '#2a2a2e', fontSize: 13 },
-      formatter: (p: { name: string; value: number; percent: number }) =>
-        `${p.name}<br/><b>${p.value}</b> · ${p.percent.toFixed(0)}%`,
+      textStyle: { color: p.text, fontSize: 13 },
+      formatter: (pt: { name: string; value: number; percent: number }) =>
+        `${pt.name}<br/><b>${pt.value}</b> · ${pt.percent.toFixed(0)}%`,
     },
     series: [
       {
@@ -112,7 +112,7 @@ const chartOption = computed(() => {
         label: { show: false },
         labelLine: { show: false },
         itemStyle: {
-          borderColor: isDark ? '#26262d' : '#fffdf9',
+          borderColor: p.surface,
           borderWidth: 2,
         },
         emphasis: { scale: true, scaleSize: 4, itemStyle: { shadowBlur: 0 } },
@@ -224,8 +224,9 @@ function typeLabel(t: string): string {
       <div class="drill-head">
         <span class="drill-head-left">
           <NTag
-            :color="{ color: COLORS[selected] + '22', textColor: COLORS[selected], borderColor: COLORS[selected] }"
+            :color="{ color: 'transparent', textColor: COLORS[selected], borderColor: COLORS[selected] }"
             size="small"
+            round
           >
             {{ LABELS[selected] }}
           </NTag>

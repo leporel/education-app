@@ -2,69 +2,76 @@ import { defineStore } from 'pinia'
 import { computed } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { darkTheme, type GlobalThemeOverrides } from 'naive-ui'
+import { dark, light, type Palette, type ThemeMode } from '@/theme/palette'
 
-// Soft, eye-friendly palette. Dark is warm-grey, not pitch black.
+// Build Naive UI overrides from the shared palette so cards, inputs,
+// alerts, etc. share the same surface/border palette as the app chrome.
 
-const lightOverrides: GlobalThemeOverrides = {
-  common: {
-    bodyColor: '#f7f5f1',
-    cardColor: '#fffdf9',
-    modalColor: '#fffdf9',
-    popoverColor: '#fffdf9',
-    baseColor: '#ffffff',
-    textColorBase: '#2a2a2e',
-    textColor1: '#2a2a2e',
-    textColor2: '#3d3d44',
-    textColor3: '#6b6b72',
-    borderColor: '#e6e2da',
-    dividerColor: '#ece8df',
-    primaryColor: '#2a8892',
-    primaryColorHover: '#3aa0ab',
-    primaryColorPressed: '#1f727a',
-    primaryColorSuppl: '#3aa0ab',
-    successColor: '#6b8e5a',
-    warningColor: '#c49a3a',
-    errorColor: '#b85c5c',
-    infoColor: '#5c8ea0',
-  },
-  Card: { borderRadius: '8px' },
-  Button: { borderRadius: '6px' },
+function buildOverrides(p: Palette): GlobalThemeOverrides {
+  return {
+    common: {
+      bodyColor: p.bg,
+      cardColor: p.surface,
+      modalColor: p.surface,
+      popoverColor: p.surface,
+      baseColor: p.bg,
+      textColorBase: p.text,
+      textColor1: p.text,
+      textColor2: p.text2,
+      textColor3: p.text3,
+      borderColor: p.border,
+      dividerColor: p.divider,
+      hoverColor: p.hover,
+      primaryColor: p.primary,
+      primaryColorHover: p.primaryHover,
+      primaryColorPressed: p.primaryPressed,
+      primaryColorSuppl: p.primaryHover,
+      successColor: p.success,
+      successColorHover: p.success,
+      successColorPressed: p.success,
+      successColorSuppl: p.success,
+      warningColor: p.warning,
+      warningColorHover: p.warning,
+      warningColorPressed: p.warning,
+      warningColorSuppl: p.warning,
+      errorColor: p.error,
+      errorColorHover: p.error,
+      errorColorPressed: p.error,
+      errorColorSuppl: p.error,
+      infoColor: p.info,
+      infoColorHover: p.info,
+      infoColorPressed: p.info,
+      infoColorSuppl: p.info,
+    },
+    Card: { borderRadius: '10px', borderColor: p.border, color: p.surface },
+    Button: {
+      borderRadius: '10px',
+      // Secondary variant: soft tinted background + accent text — matches our badges.
+      colorSecondary: p.primarySoft,
+      colorSecondaryHover: p.primarySoft,
+      colorSecondaryPressed: p.primarySoft,
+      textColorSecondary: p.primary,
+      textColorSecondaryHover: p.primaryHover,
+      textColorSecondaryPressed: p.primaryPressed,
+    },
+    Input: { borderRadius: '8px', color: p.surface, colorFocus: p.surface, border: `1px solid ${p.border}` },
+    Tabs: { tabTextColorActiveLine: p.primary, barColor: p.primary },
+    Alert: { borderRadius: '8px' },
+  }
 }
 
-const darkOverrides: GlobalThemeOverrides = {
-  common: {
-    bodyColor: '#1e1e24',
-    cardColor: '#26262d',
-    modalColor: '#26262d',
-    popoverColor: '#2b2b33',
-    baseColor: '#1e1e24',
-    textColorBase: '#d6d4ce',
-    textColor1: '#e4e2dc',
-    textColor2: '#c9c6bf',
-    textColor3: '#8e8b84',
-    borderColor: '#36363e',
-    dividerColor: '#303038',
-    primaryColor: '#6ecbd4',
-    primaryColorHover: '#87d8e0',
-    primaryColorPressed: '#5ab8c2',
-    primaryColorSuppl: '#87d8e0',
-    successColor: '#8fb07a',
-    warningColor: '#d8b462',
-    errorColor: '#d48787',
-    infoColor: '#8fb8c8',
-  },
-  Card: { borderRadius: '8px' },
-  Button: { borderRadius: '6px' },
-}
+const lightOverrides = buildOverrides(light)
+const darkOverrides = buildOverrides(dark)
 
-export type ThemeMode = 'light' | 'dark'
+export type { ThemeMode }
 
 export const useTheme = defineStore('theme', () => {
   const mode = useStorage<ThemeMode>('edu.theme', 'dark')
   const naive = computed(() => (mode.value === 'dark' ? darkTheme : null))
   const overrides = computed(() => (mode.value === 'dark' ? darkOverrides : lightOverrides))
+  const palette = computed<Palette>(() => (mode.value === 'dark' ? dark : light))
   function toggle() {
     mode.value = mode.value === 'dark' ? 'light' : 'dark'
   }
-  return { mode, naive, overrides, toggle }
+  return { mode, naive, overrides, palette, toggle }
 })

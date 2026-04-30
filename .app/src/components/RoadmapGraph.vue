@@ -33,21 +33,17 @@ function moduleState(docs: DocMeta[]): 'todo' | 'learning' | 'known' {
   return 'todo'
 }
 
-const palettes = {
-  dark: {
-    todo: { bg: '#2f2f37', border: '#55555f', fg: '#c9c6bf' },
-    learning: { bg: '#3a3224', border: '#c49a3a', fg: '#e8d89c' },
-    known: { bg: '#263022', border: '#8fb07a', fg: '#c7dcb8' },
-  },
-  light: {
-    todo: { bg: '#ece8df', border: '#b8b3a8', fg: '#3d3d44' },
-    learning: { bg: '#f6e7bf', border: '#b8873a', fg: '#5a4418' },
-    known: { bg: '#d8e5c8', border: '#6b8e5a', fg: '#34502a' },
-  },
-} as const
+const states = computed(() => {
+  const p = theme.palette
+  return {
+    todo: { bg: p.surfaceAlt, border: p.border, fg: p.text2 },
+    learning: { bg: p.warningSoft, border: p.warning, fg: p.warning },
+    known: { bg: p.successSoft, border: p.success, fg: p.success },
+  }
+})
 
 const nodes = computed<Node[]>(() => {
-  const pal = palettes[theme.mode as 'dark' | 'light']
+  const pal = states.value
   return props.domain.modules.map((m, i) => {
     const state = moduleState(m.docs)
     const p = pal[state]
@@ -95,7 +91,7 @@ function onNodeClick(ev: { node: Node }) {
       :edges-updatable="false"
       @node-click="onNodeClick"
     >
-      <Background :pattern-color="theme.mode === 'dark' ? '#40404a' : '#c8c3b8'" :gap="18" />
+      <Background :pattern-color="theme.palette.border" :gap="18" />
       <Controls />
     </VueFlow>
   </div>
@@ -108,30 +104,20 @@ function onNodeClick(ev: { node: Node }) {
   border-radius: 8px;
   overflow: hidden;
 }
-.vf-theme-dark :deep(.vue-flow__edge-path) {
-  stroke: #6b6b72;
+.graph :deep(.vue-flow__edge-path) {
+  stroke: var(--app-muted);
   stroke-width: 1.5;
 }
-.vf-theme-light :deep(.vue-flow__edge-path) {
-  stroke: #9a958a;
-  stroke-width: 1.5;
+.graph :deep(.vue-flow__controls button) {
+  background: var(--app-surface);
+  border-color: var(--app-border);
+  color: var(--app-text);
+  fill: var(--app-text);
 }
-.vf-theme-dark :deep(.vue-flow__controls button) {
-  background: #2b2b33;
-  border-color: #3a3a42;
-  color: #d6d4ce;
-  fill: #d6d4ce;
-}
-.vf-theme-dark :deep(.vue-flow__controls button:hover) {
-  background: #34343d;
-}
-.vf-theme-light :deep(.vue-flow__controls button) {
-  background: #fffdf9;
-  border-color: #d8d3c8;
-  color: #2a2a2e;
-  fill: #2a2a2e;
+.graph :deep(.vue-flow__controls button:hover) {
+  background: var(--app-hover);
 }
 .graph :deep(.vue-flow__node.selected) {
-  box-shadow: 0 0 0 2px var(--md-link, #6ecbd4);
+  box-shadow: 0 0 0 2px var(--app-primary);
 }
 </style>
