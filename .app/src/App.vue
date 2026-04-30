@@ -108,38 +108,39 @@ onMounted(async () => {
 <style>
 /* App-level CSS vars — must mirror src/theme/palette.ts */
 .theme-dark {
-    --app-bg: #1a1b24;
-    --app-sidebar: #1e1f2b;
-    --app-tree: #22232f;
-    --app-surface: #1e1f2b;
-    --app-border: #2d2e3c;
-    --app-divider: #262731;
-    --app-text: #d6d4ce;
-    --app-text-2: #c9c6bf;
-    --app-muted: #9a978f;
-    --app-text-mute2: #6b6b78;
-    --app-primary: #86a3cc;
-    --app-primary-soft: rgba(134, 163, 204, 0.18);
-    --app-success: #7fb98a;
-    --app-success-soft: rgba(127, 185, 138, 0.18);
+    --app-bg: #1a1e25;
+    --app-sidebar: #1b2026; /* panel */
+    --app-tree: #1b1f26; /* surfaceAlt */
+    --app-surface: #21262d;
+    --app-border: #252a32;
+    --app-divider: #1f2329;
+    --app-text: #dde2ea;
+    --app-text-2: #abb1bb;
+    --app-muted: #7a818c;
+    --app-text-mute2: #5a606b;
+    --app-primary: #2563b8;
+    --app-primary-soft: rgba(37, 99, 184, 0.22);
+    --app-success: #6dba8a;
+    --app-success-soft: #23392f;
     --app-warning: #d8b462;
     --app-warning-soft: rgba(216, 180, 98, 0.18);
-    --app-info: #86a3cc;
-    --app-info-soft: rgba(134, 163, 204, 0.18);
+    --app-info: #5b9bd5;
+    --app-info-soft: #1b2e4a;
     --app-error: #d48787;
     --app-hover: rgba(255, 255, 255, 0.05);
-    --app-scroll-thumb: rgba(214, 212, 206, 0.22);
-    --md-link: #86a3cc;
-    --md-link-hover: #9fb8db;
+    --app-scroll-thumb: rgba(221, 226, 234, 0.22);
+    --md-link: #2563b8;
+    --md-link-hover: #3b79ce;
+    --md-border: #414751;
 }
 .theme-light {
-    --app-bg: #f7f5f1;
-    --app-sidebar: #efece7;
-    --app-tree: #f4f2ee;
-    --app-surface: #efece7;
-    --app-border: #e6e2da;
-    --app-divider: #ece8df;
-    --app-text: #2a2a2e;
+    --app-bg: #ebe9e5;
+    --app-sidebar: #e3e0db; /* panel */
+    --app-tree: #e8e6e2; /* surfaceAlt */
+    --app-surface: #e3e0db;
+    --app-border: #dbd7cf;
+    --app-divider: #e0dcd4;
+    --app-text: #000000;
     --app-text-2: #3d3d44;
     --app-muted: #6b6b72;
     --app-text-mute2: #8e8b84;
@@ -156,10 +157,11 @@ onMounted(async () => {
     --app-scroll-thumb: rgba(42, 42, 46, 0.22);
     --md-link: #3d6e9c;
     --md-link-hover: #4d80b0;
+    --md-border: #b0aba1;
 }
 
 :root {
-    --app-bg: #1a1b24;
+    --app-bg: #1a1e25;
 }
 
 * {
@@ -294,5 +296,16 @@ body {
     grid-row: 2;
     min-height: 0;
     overflow: hidden;
+}
+
+/*  The issue is that Tag.color in Naive UI's override system maps to a different CSS var,
+ not --n-color — that one is set inline by Naive UI and ignores our theme override.
+ Since we now apply the theme class to <html>, a CSS rule with !important will reliably
+ override Naive UI's inline style for custom properties.
+
+ TODO: возможно это надо было как то по другому сделать
+ */
+.n-tag {
+    background-color: var(--app-bg) !important;
 }
 </style>

@@ -1,8 +1,8 @@
-import { defineStore } from 'pinia'
-import { computed } from 'vue'
-import { useStorage } from '@vueuse/core'
-import { darkTheme, type GlobalThemeOverrides } from 'naive-ui'
-import { dark, light, type Palette, type ThemeMode } from '@/theme/palette'
+import { defineStore } from "pinia";
+import { computed, watchEffect } from "vue";
+import { useStorage } from "@vueuse/core";
+import { darkTheme, type GlobalThemeOverrides } from "naive-ui";
+import { dark, light, type Palette, type ThemeMode } from "@/theme/palette";
 
 // Build Naive UI overrides from the shared palette so cards, inputs,
 // alerts, etc. share the same surface/border palette as the app chrome.
@@ -43,9 +43,10 @@ function buildOverrides(p: Palette): GlobalThemeOverrides {
       infoColorPressed: p.info,
       infoColorSuppl: p.info,
     },
-    Card: { borderRadius: '10px', borderColor: p.border, color: p.surface },
+    Card: { borderRadius: "10px", borderColor: p.borderCard, color: p.surface },
+    Drawer: { color: p.panel },
     Button: {
-      borderRadius: '10px',
+      borderRadius: "10px",
       // Secondary variant: soft tinted background + accent text — matches our badges.
       colorSecondary: p.primarySoft,
       colorSecondaryHover: p.primarySoft,
@@ -54,24 +55,42 @@ function buildOverrides(p: Palette): GlobalThemeOverrides {
       textColorSecondaryHover: p.primaryHover,
       textColorSecondaryPressed: p.primaryPressed,
     },
-    Input: { borderRadius: '8px', color: p.surface, colorFocus: p.surface, border: `1px solid ${p.border}` },
+    Input: {
+      borderRadius: "8px",
+      color: p.surface,
+      colorFocus: p.surface,
+      border: `1px solid ${p.border}`,
+    },
     Tabs: { tabTextColorActiveLine: p.primary, barColor: p.primary },
-    Alert: { borderRadius: '8px' },
-  }
+    Alert: { borderRadius: "8px" },
+  };
 }
 
-const lightOverrides = buildOverrides(light)
-const darkOverrides = buildOverrides(dark)
+const lightOverrides = buildOverrides(light);
+const darkOverrides = buildOverrides(dark);
 
-export type { ThemeMode }
+export type { ThemeMode };
 
-export const useTheme = defineStore('theme', () => {
-  const mode = useStorage<ThemeMode>('edu.theme', 'dark')
-  const naive = computed(() => (mode.value === 'dark' ? darkTheme : null))
-  const overrides = computed(() => (mode.value === 'dark' ? darkOverrides : lightOverrides))
-  const palette = computed<Palette>(() => (mode.value === 'dark' ? dark : light))
+export const useTheme = defineStore("theme", () => {
+  const mode = useStorage<ThemeMode>("edu.theme", "dark");
+
+  // Apply theme class to <html> so CSS vars reach Naive UI teleported elements
+  // (drawers, modals, tooltips rendered via Teleport to document.body).
+  watchEffect(() => {
+    const { classList } = document.documentElement;
+    classList.remove("theme-dark", "theme-light");
+    classList.add(`theme-${mode.value}`);
+  });
+
+  const naive = computed(() => (mode.value === "dark" ? darkTheme : null));
+  const overrides = computed(() =>
+    mode.value === "dark" ? darkOverrides : lightOverrides,
+  );
+  const palette = computed<Palette>(() =>
+    mode.value === "dark" ? dark : light,
+  );
   function toggle() {
-    mode.value = mode.value === 'dark' ? 'light' : 'dark'
+    mode.value = mode.value === "dark" ? "light" : "dark";
   }
-  return { mode, naive, overrides, palette, toggle }
-})
+  return { mode, naive, overrides, palette, toggle };
+});

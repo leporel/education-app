@@ -31,7 +31,7 @@ type BucketKey = Status
 
 const COLORS = computed<Record<BucketKey, string>>(() => ({
   known: theme.palette.success,
-  learning: theme.palette.warning,
+  learning: theme.palette.primary,
   todo: theme.palette.text3,
 }))
 const LABELS: Record<BucketKey, string> = {

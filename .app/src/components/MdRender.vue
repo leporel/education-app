@@ -214,7 +214,7 @@ function renderMd(src: string): string {
 }
 .md-render :deep(th),
 .md-render :deep(td) {
-    border: 1px solid var(--app-border);
+    border: 1px solid var(--md-border);
     padding: 6px 10px;
 }
 .md-render :deep(th) {
