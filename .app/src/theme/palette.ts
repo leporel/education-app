@@ -10,7 +10,6 @@ export interface Palette {
   surfaceAlt: string  // tree / nested panel
   border: string      // structural borders (panel edges, sidebar separators)
   borderCard: string  // card / content surface borders
-  tagBg: string       // default NTag background
   divider: string
   hover: string
 
@@ -46,7 +45,6 @@ export const dark: Palette = {
   surfaceAlt:     '#1b1f26',
   border:         '#252a32',
   borderCard:     '#414751',
-  tagBg:          '#353533',
   divider:        '#1f2329',
   hover:          'rgba(255,255,255,0.05)',
 
@@ -78,7 +76,6 @@ export const light: Palette = {
   surfaceAlt:     '#e8e6e2',
   border:         '#dbd7cf',
   borderCard:     '#b0aba1',
-  tagBg:          '#d8d5cf',
   divider:        '#e0dcd4',
   hover:          'rgba(0,0,0,0.04)',
 
