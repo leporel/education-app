@@ -190,10 +190,12 @@ const server = Bun.serve({
 
     if (pathname === '/api/search') {
       const q = (url.searchParams.get('q') ?? '').trim().toLowerCase()
+      const domainFilter = url.searchParams.get('domain')?.trim() ?? ''
       if (!q) return json([])
       const { flat } = await ensureScan()
       const hits = []
       for (const doc of flat) {
+        if (domainFilter && !doc.path.startsWith(domainFilter + '/')) continue
         const hay = `${doc.frontmatter.title} ${(doc.frontmatter.tags ?? []).join(' ')} ${doc.body}`.toLowerCase()
         const pos = hay.indexOf(q)
         if (pos < 0) continue

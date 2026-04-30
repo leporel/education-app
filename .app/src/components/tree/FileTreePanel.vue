@@ -11,10 +11,11 @@ import {
 } from 'naive-ui'
 import type { TreeOption } from 'naive-ui'
 import { Check, Folder } from 'lucide-vue-next'
+import { useDebounceFn } from '@vueuse/core'
 import { useContent } from '@/stores/content'
 import { useProgress } from '@/stores/progress'
 import { useUi } from '@/stores/ui'
-import { api } from '@/api'
+import { api, type SearchHit } from '@/api'
 import { buildTreeData, type DocTreeOption } from './buildTreeData'
 
 const route = useRoute()
@@ -24,6 +25,8 @@ const progress = useProgress()
 const ui = useUi()
 
 const searchQuery = ref('')
+const searchHits = ref<SearchHit[]>([])
+const searchLoading = ref(false)
 
 const previewOpen = ref(false)
 const previewSrc = ref('')
@@ -81,26 +84,46 @@ watch(
   },
 )
 
+const runSearch = useDebounceFn(async (q: string) => {
+  if (!q.trim() || !domainSlug.value) {
+    searchHits.value = []
+    searchLoading.value = false
+    return
+  }
+  searchLoading.value = true
+  try {
+    searchHits.value = await api.search(q, domainSlug.value)
+  } finally {
+    searchLoading.value = false
+  }
+}, 250)
+
 watch(searchQuery, (next, prev) => {
   if (next && !prev) {
-    // Search started — save current expanded state
     expandedBackup.value = [...expandedKeys.value]
   } else if (!next && prev) {
-    // Search cleared — restore saved state
     if (expandedBackup.value !== null) {
       expandedKeys.value = expandedBackup.value
       expandedBackup.value = null
     }
+    searchHits.value = []
   }
+  runSearch(next)
 })
+
+function navigateToHit(hit: SearchHit) {
+  const parts = hit.path.split('/')
+  const domain = parts[0]
+  if (parts[1] === 'modules' && parts[2]) {
+    router.push(`/d/${domain}/m/${parts[2]}/doc/${encodeURIComponent(hit.id)}`)
+  } else {
+    router.push(`/d/${domain}`)
+  }
+  searchQuery.value = ''
+}
 
 function onExpandedUpdate(keys: Array<string | number>) {
   expandedKeys.value = keys as string[]
-}
-
-// Filter: match only on label, case-insensitive
-function treeFilter(pattern: string, option: TreeOption): boolean {
-  return String(option.label ?? '').toLowerCase().includes(pattern.toLowerCase())
 }
 
 function onSelect(_keys: string[], _opts: TreeOption[], { node }: { node: TreeOption }) {
@@ -176,21 +199,19 @@ function openInExplorer() {
       </div>
 
       <div class="tree-scroll">
-        <!-- Search mode: NTree manages expansion internally -->
-        <NTree
-          v-if="searchQuery"
-          :data="treeData"
-          :pattern="searchQuery"
-          :filter="treeFilter"
-          :selected-keys="activeKey"
-          :render-suffix="renderSuffix"
-          block-line
-          expand-on-click
-          :selectable="true"
-          style="font-size: 13px; padding: 4px 4px 8px"
-          @update:selected-keys="onSelect as any"
-        />
-        <!-- Normal mode: we control expanded keys -->
+        <template v-if="searchQuery">
+          <div v-if="searchLoading" class="search-status">Поиск…</div>
+          <div v-else-if="searchHits.length === 0" class="search-status">Ничего не найдено</div>
+          <div
+            v-for="hit in searchHits"
+            :key="hit.id"
+            class="search-hit"
+            @click="navigateToHit(hit)"
+          >
+            <div class="hit-title">{{ hit.title || hit.id }}</div>
+            <div class="hit-snippet">{{ hit.snippet }}</div>
+          </div>
+        </template>
         <NTree
           v-else
           :data="treeData"
@@ -263,6 +284,36 @@ function openInExplorer() {
   flex: 1;
   overflow: auto;
   min-height: 0;
+}
+.search-status {
+  padding: 16px 12px;
+  font-size: 12px;
+  opacity: 0.5;
+  text-align: center;
+}
+.search-hit {
+  padding: 7px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--app-border);
+  transition: background 0.1s;
+}
+.search-hit:hover {
+  background: var(--app-hover);
+}
+.hit-title {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hit-snippet {
+  font-size: 11px;
+  opacity: 0.55;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .panel-footer {
   flex-shrink: 0;

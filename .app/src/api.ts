@@ -141,6 +141,7 @@ export const api = {
   setStatus: (docId: string, state: 'todo' | 'learning' | 'known') =>
     post<{ ok: true }>('/api/status', { docId, state }),
   statuses: () => get<Record<string, 'todo' | 'learning' | 'known'>>('/api/status'),
-  search: (q: string) => get<SearchHit[]>(`/api/search?q=${encodeURIComponent(q)}`),
+  search: (q: string, domain?: string) =>
+    get<SearchHit[]>(`/api/search?q=${encodeURIComponent(q)}${domain ? `&domain=${encodeURIComponent(domain)}` : ''}`),
   openInExplorer: (path: string) => post<{ ok: true }>('/api/open', { path }),
 }
