@@ -24,7 +24,6 @@ domains/         — доменные области обучения
     misc/        — произвольные справочные файлы (pdf, картинки, аудио)
     notes/       — пользовательские заметки (управляются UI)
     modules/NN-*/— модули: index / theory / cards / drills / lessons
-prompts_logs/    — логи init-промптов и сессий
 ```
 
 Подробности формата (frontmatter, `card`/`drill` блоки, правила именования) —
