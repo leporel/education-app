@@ -1,5 +1,5 @@
 ---
-id: example-schema.katakana.cards
+id: example.katakana.cards
 type: cards
 title: Катакана — карточки
 tags: [japanese, katakana, cards]

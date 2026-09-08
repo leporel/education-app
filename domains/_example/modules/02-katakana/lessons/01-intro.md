@@ -1,5 +1,5 @@
 ---
-id: example-schema.katakana.lesson-01
+id: example.katakana.lesson-01
 type: lesson
 title: "Урок 01 — Вводный: ряд ア"
 tags: [japanese, katakana, lesson, row-a]

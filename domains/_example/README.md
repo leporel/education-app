@@ -1,5 +1,5 @@
 ---
-id: example-schema.index
+id: example.index
 type: index
 title: "Пример-домен (схема воркспейса)"
 tags: [japanese, example]

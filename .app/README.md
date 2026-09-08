@@ -9,6 +9,7 @@
 - Naive UI + lucide-vue-next (иконки)
 - markdown-it + highlight.js — рендер MD
 - mermaid — блок-схемы из ```mermaid-блоков (грузится лениво, только когда есть диаграммы)
+- katex + @vscode/markdown-it-katex — формулы `$...$`, `$$...$$` и ```math-блоки
 - js-yaml — парсинг frontmatter
 - echarts + vue-echarts — графики прогресса
 - @vue-flow/* — граф roadmap (позже)

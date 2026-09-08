@@ -1,5 +1,5 @@
 ---
-id: example-schema.particles-wa-ga.lesson-01
+id: example.particles-wa-ga.lesson-01
 type: lesson
 title: "Урок 01 — は против が на примерах"
 tags: [japanese, grammar, particles, lesson]

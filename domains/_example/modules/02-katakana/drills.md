@@ -1,5 +1,5 @@
 ---
-id: example-schema.katakana.drills
+id: example.katakana.drills
 type: drills
 title: Катакана — упражнения
 tags: [japanese, katakana, drills]

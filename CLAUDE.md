@@ -42,7 +42,7 @@ domains/
 ```
 
 Folder/file names use `NN-slug` (two-digit prefix) to keep stable ordering without
-extra metadata. Domains prefixed with `_` (e.g. `_example-schema`) are examples or
+extra metadata. Domains prefixed with `_` (e.g. `_example`) are examples or
 scratch and should be ignored by the learner flow.
 
 ## Session protocol
@@ -111,6 +111,13 @@ hint: <optional>
 
 Place `card` blocks in `cards.md`, `drill` blocks in `drills.md`. A single file can
 contain many blocks separated by regular markdown headings/prose.
+
+### Diagrams and formulas
+
+The UI renders ```mermaid fences (flowchart, sequenceDiagram, stateDiagram-v2) as
+diagrams and KaTeX math: inline `$...$`, display `$$...$$`, or a ```math fence. Prefer
+Unicode for simple formulas (`x²`, `√n`, `Σ`) so plain editors stay readable; use LaTeX
+for fractions, limits, matrices. Escape a literal dollar sign as `\$`.
 
 ### Lessons
 

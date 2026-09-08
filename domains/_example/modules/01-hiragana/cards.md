@@ -1,5 +1,5 @@
 ---
-id: example-schema.hiragana.cards
+id: example.hiragana.cards
 type: cards
 title: Хирагана — карточки
 tags: [japanese, hiragana, cards]

@@ -1,5 +1,5 @@
 ---
-id: example-schema.note.study-progress
+id: example.note.study-progress
 type: note
 title: Мой прогресс
 tags: [progress, personal]

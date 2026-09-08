@@ -1,5 +1,5 @@
 ---
-id: example-schema.hiragana.drills
+id: example.hiragana.drills
 type: drills
 title: Хирагана — упражнения
 tags: [japanese, hiragana, drills]

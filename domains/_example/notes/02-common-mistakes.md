@@ -1,5 +1,5 @@
 ---
-id: example-schema.note.common-mistakes
+id: example.note.common-mistakes
 type: note
 title: Частые ошибки
 tags: [mistakes, review]

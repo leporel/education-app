@@ -1,5 +1,5 @@
 ---
-id: example-schema.roadmap
+id: example.roadmap
 type: roadmap
 title: План обучения — japanese (пример)
 tags: [japanese, roadmap, example]

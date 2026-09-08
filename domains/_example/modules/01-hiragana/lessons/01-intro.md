@@ -1,5 +1,5 @@
 ---
-id: example-schema.hiragana.lesson-01
+id: example.hiragana.lesson-01
 type: lesson
 title: "Урок 01 — Вводный: ряд あ"
 tags: [japanese, hiragana, lesson, row-a]

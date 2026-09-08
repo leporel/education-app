@@ -1,5 +1,5 @@
 ---
-id: example-schema.katakana.theory
+id: example.katakana.theory
 type: theory
 title: Катакана — теория
 tags: [japanese, katakana, theory]

@@ -1,5 +1,5 @@
 ---
-id: example-schema.katakana.index
+id: example.katakana.index
 type: index
 title: Катакана
 tags: [japanese, katakana, writing]

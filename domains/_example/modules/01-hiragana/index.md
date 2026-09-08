@@ -1,5 +1,5 @@
 ---
-id: example-schema.hiragana.index
+id: example.hiragana.index
 type: index
 title: Хирагана
 tags: [japanese, hiragana, writing]

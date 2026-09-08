@@ -4,6 +4,8 @@ import { useRouter } from "vue-router";
 import MarkdownIt from "markdown-it";
 import hljs from "highlight.js";
 import "highlight.js/styles/github-dark.css";
+import katexPlugin from "@vscode/markdown-it-katex";
+import "katex/dist/katex.min.css";
 import { NCard, NTag } from "naive-ui";
 import { parseBlocks } from "@/lib/parse";
 import type { Card, Drill } from "@/api";
@@ -71,6 +73,10 @@ const md = new MarkdownIt({
         return "";
     },
 });
+
+// `$...$`, `$$...$$` and ```math fences render as KaTeX; a malformed formula is
+// shown in red instead of breaking the whole document.
+md.use(katexPlugin, { throwOnError: false, enableFencedBlocks: true });
 
 // ```mermaid fences become a placeholder that useMermaid turns into SVG after
 // mount; data-src keeps the source so the diagram can be redrawn on theme change.

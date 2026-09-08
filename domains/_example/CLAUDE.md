@@ -1,4 +1,4 @@
-# CLAUDE.md — _example-schema
+# CLAUDE.md — _example
 
 This is an example domain used to demonstrate the workspace conventions. Do **not**
 treat it as an active learning target unless the user explicitly says so.
