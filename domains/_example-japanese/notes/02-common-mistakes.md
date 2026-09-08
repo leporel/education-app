@@ -1,5 +1,5 @@
 ---
-id: japanese.note.common-mistakes
+id: example-japanese.note.common-mistakes
 type: note
 title: Частые ошибки
 tags: [mistakes, review]

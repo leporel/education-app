@@ -8,6 +8,7 @@
 - Vue 3 + vue-router + Pinia
 - Naive UI + lucide-vue-next (иконки)
 - markdown-it + highlight.js — рендер MD
+- mermaid — блок-схемы из ```mermaid-блоков (грузится лениво, только когда есть диаграммы)
 - js-yaml — парсинг frontmatter
 - echarts + vue-echarts — графики прогресса
 - @vue-flow/* — граф roadmap (позже)

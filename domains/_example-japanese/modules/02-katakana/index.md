@@ -1,5 +1,5 @@
 ---
-id: japanese.katakana.index
+id: example-japanese.katakana.index
 type: index
 title: Катакана
 tags: [japanese, katakana, writing]

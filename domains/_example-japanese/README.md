@@ -1,5 +1,5 @@
 ---
-id: japanese.index
+id: example-japanese.index
 type: index
 title: Japanese (пример-домен)
 tags: [japanese, example]

@@ -1,5 +1,5 @@
 ---
-id: japanese.note.study-progress
+id: example-japanese.note.study-progress
 type: note
 title: Мой прогресс
 tags: [progress, personal]

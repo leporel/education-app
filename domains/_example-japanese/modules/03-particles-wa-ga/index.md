@@ -1,5 +1,5 @@
 ---
-id: japanese.particles-wa-ga.index
+id: example-japanese.particles-wa-ga.index
 type: index
 title: Частицы は и が
 tags: [japanese, grammar, particles]

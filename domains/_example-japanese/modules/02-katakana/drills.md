@@ -1,5 +1,5 @@
 ---
-id: japanese.katakana.drills
+id: example-japanese.katakana.drills
 type: drills
 title: Катакана — упражнения
 tags: [japanese, katakana, drills]

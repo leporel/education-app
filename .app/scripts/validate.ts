@@ -1,34 +1,13 @@
 // Run: bun scripts/validate.ts
 // Walks G:/PPP/Education and validates YAML frontmatter + every fenced `card`/`drill` block.
-import { readdir, readFile } from 'node:fs/promises'
-import { join, relative, sep } from 'node:path'
+import { readFile } from 'node:fs/promises'
+import { relative, sep } from 'node:path'
 import yaml from 'js-yaml'
-
-const ROOT = join(import.meta.dir, '..', '..')
-
-const FRONTMATTER_RE = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/
-const BLOCK_RE = /```(card|drill)\r?\n([\s\S]*?)\r?\n```/g
+import { BLOCK_RE, FRONTMATTER_RE, ROOT, walkMd } from './lib/md'
 
 let errors = 0
 let files = 0
 let blocks = 0
-
-async function walk(dir: string, out: string[] = []): Promise<string[]> {
-  let entries
-  try {
-    entries = await readdir(dir, { withFileTypes: true })
-  } catch {
-    return out
-  }
-  for (const e of entries) {
-    if (e.name === 'node_modules' || e.name === 'dist' || e.name === '.app' || e.name === '.state')
-      continue
-    const full = join(dir, e.name)
-    if (e.isDirectory()) await walk(full, out)
-    else if (e.isFile() && e.name.endsWith('.md')) out.push(full)
-  }
-  return out
-}
 
 function report(relPath: string, label: string, err: unknown) {
   errors++
@@ -37,7 +16,7 @@ function report(relPath: string, label: string, err: unknown) {
   console.log(`  ${msg.split('\n').join('\n  ')}`)
 }
 
-const mdFiles = await walk(ROOT)
+const mdFiles = await walkMd(ROOT)
 for (const abs of mdFiles) {
   files++
   const rel = relative(ROOT, abs).split(sep).join('/')

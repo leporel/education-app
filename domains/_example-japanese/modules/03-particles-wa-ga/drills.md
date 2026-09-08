@@ -1,5 +1,5 @@
 ---
-id: japanese.particles-wa-ga.drills
+id: example-japanese.particles-wa-ga.drills
 type: drills
 title: は и が — упражнения
 tags: [japanese, grammar, particles, drills]

@@ -1,5 +1,5 @@
 ---
-id: japanese.memory
+id: example-japanese.memory
 type: memory
 title: Память — japanese (пример)
 tags: [japanese, memory, example]

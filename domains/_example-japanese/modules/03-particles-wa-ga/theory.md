@@ -1,5 +1,5 @@
 ---
-id: japanese.particles-wa-ga.theory
+id: example-japanese.particles-wa-ga.theory
 type: theory
 title: は и が — теория
 tags: [japanese, grammar, particles, theory]

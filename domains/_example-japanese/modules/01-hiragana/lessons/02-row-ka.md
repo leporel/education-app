@@ -1,5 +1,5 @@
 ---
-id: japanese.hiragana.lesson-02
+id: example-japanese.hiragana.lesson-02
 type: lesson
 title: "Урок 02 — Ряд か"
 tags: [japanese, hiragana, lesson, row-ka]

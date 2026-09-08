@@ -1,5 +1,5 @@
 ---
-id: japanese.hiragana.index
+id: example-japanese.hiragana.index
 type: index
 title: Хирагана
 tags: [japanese, hiragana, writing]

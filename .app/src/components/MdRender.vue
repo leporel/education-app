@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import MarkdownIt from "markdown-it";
 import hljs from "highlight.js";
@@ -8,6 +8,7 @@ import { NCard, NTag } from "naive-ui";
 import { parseBlocks } from "@/lib/parse";
 import type { Card, Drill } from "@/api";
 import { useContent } from "@/stores/content";
+import { useMermaid } from "@/composables/useMermaid";
 import DrillRunner from "./DrillRunner.vue";
 
 const props = defineProps<{
@@ -71,6 +72,17 @@ const md = new MarkdownIt({
     },
 });
 
+// ```mermaid fences become a placeholder that useMermaid turns into SVG after
+// mount; data-src keeps the source so the diagram can be redrawn on theme change.
+const defaultFence = md.renderer.rules.fence!;
+md.renderer.rules.fence = (tokens, idx, options, env, self) => {
+    const token = tokens[idx];
+    const lang = token.info.trim().split(/\s+/)[0];
+    if (lang !== "mermaid") return defaultFence(tokens, idx, options, env, self);
+    const src = md.utils.escapeHtml(token.content.trim());
+    return `<pre class="mermaid" data-src="${src}">${src}</pre>\n`;
+};
+
 function resolveRawSrc(
     src: string,
     docPath: string | undefined,
@@ -128,18 +140,23 @@ const segments = computed<Segment[]>(() => {
     return out;
 });
 
-function renderMd(src: string): string {
-    return md.render(src);
-}
+// Rendered once per body change (not per template re-render) so the mermaid
+// watcher fires exactly when the HTML actually changes.
+const rendered = computed(() =>
+    segments.value.map((seg) => (seg.type === "md" ? md.render(seg.md!) : "")),
+);
+
+const root = ref<HTMLElement | null>(null);
+useMermaid(root, rendered);
 </script>
 
 <template>
-    <div class="md-render" @click="onClick">
+    <div ref="root" class="md-render" @click="onClick">
         <template v-for="(seg, i) in segments" :key="i">
             <div
                 v-if="seg.type === 'md'"
                 class="md"
-                v-html="renderMd(seg.md!)"
+                v-html="rendered[i]"
             />
             <NCard
                 v-else-if="seg.type === 'card'"
@@ -191,6 +208,21 @@ function renderMd(src: string): string {
     padding: 12px;
     border-radius: 6px;
     overflow: auto;
+}
+.md-render :deep(pre.mermaid) {
+    background: transparent;
+    text-align: center;
+    overflow-x: auto;
+}
+.md-render :deep(pre.mermaid svg) {
+    max-width: 100%;
+    height: auto;
+}
+.md-render :deep(pre.mermaid.mermaid-error) {
+    text-align: left;
+    border: 1px dashed var(--md-border);
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 0.85em;
 }
 .md-render :deep(.md-img-link) {
     display: inline-block;

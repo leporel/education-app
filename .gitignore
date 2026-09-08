@@ -1,4 +1,4 @@
-prompts_logs/
+.prompts/
 domains/*
 !domains/_example-japanese/
 .app/education-app.exe

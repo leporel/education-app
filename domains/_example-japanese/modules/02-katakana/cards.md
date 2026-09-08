@@ -1,5 +1,5 @@
 ---
-id: japanese.katakana.cards
+id: example-japanese.katakana.cards
 type: cards
 title: Катакана — карточки
 tags: [japanese, katakana, cards]

@@ -1,5 +1,5 @@
 ---
-id: japanese.hiragana.theory
+id: example-japanese.hiragana.theory
 type: theory
 title: Хирагана — теория
 tags: [japanese, hiragana, theory]
