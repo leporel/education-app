@@ -1,6 +1,6 @@
 .prompts/
 domains/*
-!domains/_example-japanese/
+!domains/_example-schema/
 .app/education-app.exe
 .app/education-app
 .app/server/embedded-dist.ts
