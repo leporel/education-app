@@ -76,7 +76,7 @@ export interface NoteDoc {
 }
 
 export interface DomainNode {
-  slug: string            // "_example-japanese"
+  slug: string            // "_example-schema"
   hidden: boolean         // slug starts with "_"
   docs: Doc[]             // README, memory, roadmap
   modules: ModuleNode[]

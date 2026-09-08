@@ -42,7 +42,7 @@ domains/
 ```
 
 Folder/file names use `NN-slug` (two-digit prefix) to keep stable ordering without
-extra metadata. Domains prefixed with `_` (e.g. `_example-japanese`) are examples or
+extra metadata. Domains prefixed with `_` (e.g. `_example-schema`) are examples or
 scratch and should be ignored by the learner flow.
 
 ## Session protocol
